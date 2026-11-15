@@ -30,7 +30,6 @@ body {
     transition: 0.3s;
 }
 
-
 /* ===================================
    LIGHT THEME
 =================================== */
@@ -46,7 +45,6 @@ body.light-theme {
     --accent2: #6d28d9;
 }
 
-
 /* ===================================
    NAVIGATION
 =================================== */
@@ -58,7 +56,6 @@ body.light-theme {
     padding: 18px 8%;
     background: var(--surface);
     border-bottom: 1px solid var(--border);
-
     position: sticky;
     top: 0;
     z-index: 100;
@@ -107,7 +104,6 @@ nav a:hover {
     color: white;
 }
 
-
 /* ===================================
    COMMON BUTTONS
 =================================== */
@@ -141,7 +137,6 @@ nav a:hover {
     transform: translateY(-3px);
 }
 
-
 /* ===================================
    HERO SECTION
 =================================== */
@@ -149,7 +144,6 @@ nav a:hover {
 .hero {
     min-height: 570px;
     padding: 90px 10%;
-
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -197,7 +191,6 @@ body.light-theme .hero {
     margin-bottom: 28px;
 }
 
-
 /* ===================================
    HERO CARD
 =================================== */
@@ -206,11 +199,9 @@ body.light-theme .hero {
     width: 350px;
     flex-shrink: 0;
     padding: 28px;
-
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 20px;
-
     box-shadow: 0 20px 60px #00000030;
 }
 
@@ -224,10 +215,8 @@ body.light-theme .hero {
     width: 75px;
     height: 75px;
     margin: 30px auto 18px;
-
     display: grid;
     place-items: center;
-
     background: var(--surface2);
     border-radius: 20px;
     font-size: 38px;
@@ -264,7 +253,6 @@ body.light-theme .hero {
     font-size: 11px;
 }
 
-
 /* ===================================
    GENERAL SECTIONS
 =================================== */
@@ -288,7 +276,6 @@ body.light-theme .hero {
     color: var(--muted);
     font-size: 15px;
 }
-
 
 /* ===================================
    INFORMATION CARDS
@@ -334,7 +321,6 @@ body.light-theme .hero {
     font-size: 14px;
 }
 
-
 /* ===================================
    FORMULA CARD
 =================================== */
@@ -343,7 +329,6 @@ body.light-theme .hero {
     margin-top: 30px;
     padding: 30px;
     text-align: center;
-
     background: var(--surface2);
     border: 1px solid var(--border);
     border-radius: 15px;
@@ -365,7 +350,6 @@ body.light-theme .hero {
     font-size: 13px;
 }
 
-
 /* ===================================
    OPTIMIZER SECTION
 =================================== */
@@ -378,7 +362,6 @@ body.light-theme .hero {
     max-width: 850px;
     margin: auto;
     padding: 35px;
-
     background: var(--bg);
     border: 1px solid var(--border);
     border-radius: 17px;
@@ -411,13 +394,10 @@ input {
     width: 100%;
     padding: 13px;
     margin-bottom: 17px;
-
     background: var(--surface);
     color: var(--text);
-
     border: 1px solid var(--border);
     border-radius: 8px;
-
     outline: none;
     font-size: 14px;
 }
@@ -450,7 +430,6 @@ input:focus {
     color: #22c55e !important;
 }
 
-
 /* ===================================
    PRODUCT LIST
 =================================== */
@@ -469,10 +448,8 @@ input:focus {
     justify-content: space-between;
     align-items: center;
     gap: 15px;
-
     padding: 14px;
     margin-top: 10px;
-
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 9px;
@@ -512,7 +489,6 @@ input:focus {
     margin-top: 20px;
 }
 
-
 /* ===================================
    ALGORITHM TABS
 =================================== */
@@ -527,13 +503,10 @@ input:focus {
 
 .algorithm-tab {
     padding: 12px 19px;
-
     background: var(--surface);
     color: var(--text);
-
     border: 1px solid var(--border);
     border-radius: 9px;
-
     cursor: pointer;
     font-size: 14px;
     transition: 0.3s;
@@ -546,7 +519,6 @@ input:focus {
     color: white;
 }
 
-
 /* ===================================
    RESULT CARD
 =================================== */
@@ -555,7 +527,6 @@ input:focus {
     max-width: 950px;
     margin: auto;
     padding: 30px;
-
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 16px;
@@ -574,7 +545,6 @@ input:focus {
     color: var(--muted);
     font-size: 14px;
 }
-
 
 /* ===================================
    COMPLEXITY
@@ -606,7 +576,6 @@ input:focus {
     margin-top: 5px;
 }
 
-
 /* ===================================
    ALGORITHM STEPS
 =================================== */
@@ -633,7 +602,6 @@ input:focus {
     font-size: 14px;
 }
 
-
 /* ===================================
    SELECTED PRODUCTS
 =================================== */
@@ -642,10 +610,8 @@ input:focus {
     display: flex;
     justify-content: space-between;
     gap: 10px;
-
     padding: 12px;
     margin: 8px 0;
-
     background: var(--surface2);
     border-radius: 8px;
     font-size: 14px;
@@ -655,7 +621,6 @@ input:focus {
     color: var(--accent);
     font-weight: bold;
 }
-
 
 /* ===================================
    RESULT SUMMARY
@@ -688,14 +653,11 @@ input:focus {
 .result-message {
     margin-top: 20px;
     padding: 14px;
-
     background: var(--surface2);
     border-radius: 8px;
-
     color: var(--muted);
     font-size: 13px;
 }
-
 
 /* ===================================
    FOOTER
@@ -704,7 +666,6 @@ input:focus {
 footer {
     text-align: center;
     padding: 35px 15px;
-
     background: var(--surface);
     border-top: 1px solid var(--border);
 }
@@ -724,13 +685,11 @@ footer p {
     font-size: 11px;
 }
 
-
 /* ===================================
    RESPONSIVE DESIGN
 =================================== */
 
 @media (max-width: 850px) {
-
     .navbar {
         padding: 17px 5%;
     }
@@ -750,12 +709,9 @@ footer p {
     .section {
         padding: 65px 6%;
     }
-
 }
 
-
 @media (max-width: 650px) {
-
     .navbar {
         flex-direction: column;
         gap: 15px;
@@ -812,5 +768,84 @@ footer p {
     .algorithm-tab {
         flex: 1 1 40%;
     }
+}
 
+/* ===================================
+   COMPLEXITY EXPLANATIONS
+=================================== */
+
+.complexity-box p {
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 8px;
+    line-height: 1.5;
+}
+
+/* ===================================
+   FOUR-ALGORITHM COMPARISON DASHBOARD
+=================================== */
+
+.comparison-card {
+    max-width: 1150px;
+    margin: 0 auto 28px;
+    padding: 26px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+}
+
+.comparison-heading h3 {
+    font-size: 21px;
+    margin-bottom: 5px;
+}
+
+.comparison-heading p,
+.comparison-note {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.comparison-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    margin-top: 18px;
+}
+
+.comparison-table {
+    width: 100%;
+    min-width: 850px;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.comparison-table th,
+.comparison-table td {
+    padding: 13px 11px;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.comparison-table th {
+    color: var(--accent);
+    background: var(--surface2);
+}
+
+.comparison-table td {
+    color: var(--text);
+}
+
+.comparison-table .optimal-row td {
+    background: #16a34a18;
+}
+
+.comparison-note {
+    margin-top: 15px;
+    line-height: 1.6;
+}
+
+@media (max-width: 650px) {
+    .comparison-card {
+        padding: 18px;
+    }
 }
