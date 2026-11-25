@@ -1,839 +1,831 @@
 
-document.addEventListener("DOMContentLoaded", function () {
-    // 1. HTML ELEMENTS
-    const budgetInput = document.getElementById("budget");
-    const nameInput = document.getElementById("productName");
-    const priceInput = document.getElementById("productPrice");
-    const valueInput = document.getElementById("productValue");
+// ================================================
+// SMART SHOPPING BUDGET OPTIMIZER
+// Mathematical Working for All Four Algorithms
+// ================================================
 
-    const addButton = document.getElementById("addProduct");
-    const sampleButton = document.getElementById("loadSample");
-    const runButton = document.getElementById("runAlgorithms");
+const products = [
+    { name: "Laptop Bag", price: 1500, value: 80 },
+    { name: "Headphones", price: 2000, value: 90 },
+    { name: "Shoes", price: 2500, value: 100 },
+    { name: "Watch", price: 1000, value: 50 },
+    { name: "Keyboard", price: 1200, value: 70 }
+];
 
-    const message = document.getElementById("message");
-    const productList = document.getElementById("productList");
-    const themeToggle = document.getElementById("themeToggle");
+let currentBudget = 5000;
+let algorithmResults = {};
 
-    let products = [];
-    let results = {};
+// ================================================
+// COMMON FUNCTIONS
+// ================================================
 
-    // 2. THEME TOGGLE
-    const savedTheme = localStorage.getItem("websiteTheme");
+function money(n) {
+    return "₹" + n.toLocaleString("en-IN");
+}
 
-    if (savedTheme === "light") {
-        document.body.classList.add("light-theme");
+function names(items) {
+    return items.length
+        ? items.map(p => p.name).join(" + ")
+        : "No products";
+}
+
+function sumPrice(items) {
+    return items.reduce((s, p) => s + p.price, 0);
+}
+
+function sumValue(items) {
+    return items.reduce((s, p) => s + p.value, 0);
+}
+
+function makeResult(name, selected, steps) {
+    const cost = sumPrice(selected);
+
+    return {
+        algorithm: name,
+        selected,
+        totalCost: cost,
+        totalValue: sumValue(selected),
+        remaining: currentBudget - cost,
+        steps
+    };
+}
+
+function step(title, content) {
+    return `
+        <div class="step">
+            <strong>${title}</strong>
+            <div style="margin-top:10px;line-height:1.9">
+                ${content}
+            </div>
+        </div>
+    `;
+}
+
+function calculation(title, formula, answer) {
+    return `
+        <div style="
+            background:#10162b;
+            padding:13px;
+            margin:9px 0;
+            border-radius:8px;
+            border-left:3px solid #a886f4;
+        ">
+            <strong>${title}</strong>
+            <div style="font-family:monospace;margin-top:7px">
+                ${formula}
+            </div>
+            <div style="color:#c4a5ff;margin-top:5px">
+                ${answer}
+            </div>
+        </div>
+    `;
+}
+
+function subsetTable(subsets) {
+    return `
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Combination</th>
+                        <th>Price Calculation</th>
+                        <th>Total Price</th>
+                        <th>Total Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${subsets.map(s => `
+                        <tr>
+                            <td>${names(s.selected)}</td>
+                            <td>${s.selected.length
+                                ? s.selected.map(p => p.price).join(" + ")
+                                : "0"}</td>
+                            <td>${money(s.cost)}</td>
+                            <td>${s.value}</td>
+                        </tr>
+                    `).join("")}
+                </tbody>
+            </table>
+        </div>
+    `;
+}
+
+function displayProducts() {
+    document.getElementById("productList").innerHTML =
+        products.map(p => `
+            <div class="product-card">
+                <h3>${p.name}</h3>
+                <p>Price: ${money(p.price)}</p>
+                <p>Value Score: ${p.value}</p>
+            </div>
+        `).join("");
+}
+
+// ================================================
+// 1. BRUTE FORCE
+// ================================================
+
+function bruteForce() {
+    const steps = [];
+    const n = products.length;
+
+    let bestProducts = [];
+    let bestValue = 0;
+    let allCombinations = [];
+
+    // Step 1: Number of combinations
+    const totalCombinations = 2 ** n;
+
+    steps.push(step(
+        "Step 1: Calculate total combinations",
+        calculation(
+            "Formula",
+            "Total combinations = 2ⁿ",
+            `= 2⁵ = ${totalCombinations} combinations`
+        ) +
+        "Each product has two choices: include (1) or exclude (0)."
+    ));
+
+    // Step 2: Generate every combination
+    for (let mask = 0; mask < totalCombinations; mask++) {
+        let selected = [];
+
+        for (let i = 0; i < n; i++) {
+            if (mask & (1 << i)) {
+                selected.push(products[i]);
+            }
+        }
+
+        const cost = sumPrice(selected);
+        const value = sumValue(selected);
+
+        const feasible = cost <= currentBudget;
+
+        allCombinations.push({
+            selected,
+            cost,
+            value,
+            feasible
+        });
+
+        if (feasible && value > bestValue) {
+            bestValue = value;
+            bestProducts = [...selected];
+        }
     }
 
-    function updateThemeButton() {
-        themeToggle.textContent =
-            document.body.classList.contains("light-theme")
-                ? "🌙 Dark Mode"
-                : "☀️ Light Mode";
-    }
+    // Display all combinations
+    steps.push(step(
+        "Step 2: Generate and calculate all combinations",
+        `<p>The algorithm generates all ${totalCombinations} combinations.</p>
+         <p>For every combination:</p>
+         <p>Total Price = Sum of product prices</p>
+         <p>Total Value = Sum of product values</p>
+         ${subsetTable(allCombinations.map(s => ({
+             selected: s.selected,
+             cost: s.cost,
+             value: s.value
+         })))}`
+    ));
 
-    updateThemeButton();
+    // Step 3: Check feasibility
+    const feasibleCount = allCombinations.filter(
+        c => c.feasible
+    ).length;
 
-    themeToggle.addEventListener("click", function () {
-        document.body.classList.toggle("light-theme");
+    steps.push(step(
+        "Step 3: Check budget constraint",
+        calculation(
+            "Budget condition",
+            "Total Price ≤ Budget",
+            `${money(bestProducts.length ? currentBudget : currentBudget)}`
+        ) +
+        `<p>Feasible combinations: ${feasibleCount}</p>
+         <p>Infeasible combinations: ${totalCombinations - feasibleCount}</p>
+         <p>Combinations exceeding ${money(currentBudget)} are rejected.</p>`
+    ));
 
-        const theme =
-            document.body.classList.contains("light-theme")
-                ? "light"
-                : "dark";
+    // Step 4: Best combination
+    steps.push(step(
+        "Step 4: Find maximum value",
+        calculation(
+            "Selected combination",
+            names(bestProducts),
+            `Total Value = ${bestValue}`
+        ) +
+        calculation(
+            "Verify total price",
+            bestProducts.map(p => p.price).join(" + "),
+            `= ${money(sumPrice(bestProducts))} ≤ ${money(currentBudget)}`
+        )
+    ));
 
-        localStorage.setItem("websiteTheme", theme);
-        updateThemeButton();
-    });
+    return makeResult("Brute Force", bestProducts, steps);
+}
 
-    // 3. DISPLAY MESSAGES
-    function showMessage(text, type = "") {
-        message.textContent = text;
-        message.className = type;
-    }
+// ================================================
+// 2. DIVIDE AND CONQUER
+// MEET-IN-THE-MIDDLE
+// ================================================
 
-    // 4. CLEAR OLD RESULTS
-    function clearResults() {
-        results = {};
+function generateSubsets(items) {
+    const result = [];
 
-        document.getElementById("resultTitle").textContent =
-            "Brute Force Algorithm";
+    for (let mask = 0; mask < 2 ** items.length; mask++) {
+        const selected = [];
 
-        document.getElementById("resultDescription").textContent =
-            "Run the algorithms to see their results.";
+        for (let i = 0; i < items.length; i++) {
+            if (mask & (1 << i)) {
+                selected.push(items[i]);
+            }
+        }
 
-        document.getElementById("timeComplexity").textContent = "O(n × 2ⁿ)";
-        document.getElementById("spaceComplexity").textContent = "O(n)";
-
-        document.getElementById("timeExplanation").textContent =
-            "Run the algorithms to view the time analysis.";
-
-        document.getElementById("spaceExplanation").textContent =
-            "Run the algorithms to view the space analysis.";
-
-        renderComparisonDashboard();
-
-        document.getElementById("algorithmSteps").innerHTML =
-            "<li>Enter your budget and products.</li>" +
-            "<li>Click Run All Algorithms.</li>" +
-            "<li>Select an algorithm to view its explanation.</li>";
-
-        document.getElementById("selectedProducts").textContent =
-            "Results will appear here.";
-
-        document.getElementById("totalPrice").textContent = "₹0";
-        document.getElementById("totalValue").textContent = "0";
-        document.getElementById("remainingBudget").textContent = "₹0";
-
-        document.getElementById("resultMessage").textContent =
-            "Add products and run the algorithms to compare results.";
-
-        document.querySelectorAll(".algorithm-tab").forEach(function (tab) {
-            tab.classList.toggle(
-                "active",
-                tab.dataset.algorithm === "brute"
-            );
+        result.push({
+            selected,
+            cost: sumPrice(selected),
+            value: sumValue(selected)
         });
     }
 
-    // 5. DISPLAY PRODUCT LIST
-    function displayProducts() {
-        productList.innerHTML = "";
+    return result;
+}
 
-        if (products.length === 0) {
-            productList.innerHTML =
-                '<p class="empty-message">No products added yet.</p>';
-            return;
+function divideAndConquer() {
+    const steps = [];
+
+    // Step 1: Divide
+    const middle = Math.floor(products.length / 2);
+
+    const groupA = products.slice(0, middle);
+    const groupB = products.slice(middle);
+
+    steps.push(step(
+        "Step 1: Divide the products",
+        `<p>Number of products = ${products.length}</p>
+         <p>Group A = ${names(groupA)}</p>
+         <p>Group B = ${names(groupB)}</p>
+         <p>Products are divided into two smaller groups.</p>`
+    ));
+
+    // Step 2: Generate subsets
+    const subsetsA = generateSubsets(groupA);
+    const subsetsB = generateSubsets(groupB);
+
+    steps.push(step(
+        "Step 2: Generate subsets",
+        `<p>Group A subsets = 2² = ${subsetsA.length}</p>
+         ${subsetTable(subsetsA)}
+         <p>Group B subsets = 2³ = ${subsetsB.length}</p>
+         ${subsetTable(subsetsB)}`
+    ));
+
+    // Step 3: Sort Group B
+    subsetsB.sort((a, b) => a.cost - b.cost);
+
+    steps.push(step(
+        "Step 3: Sort Group B by price",
+        `<p>Subsets are arranged from lowest to highest price.</p>
+         ${subsetTable(subsetsB)}`
+    ));
+
+    // Step 4: Prefix best
+    const prefixBest = [];
+    let bestIndex = 0;
+
+    for (let i = 0; i < subsetsB.length; i++) {
+        if (subsetsB[i].value > subsetsB[bestIndex].value) {
+            bestIndex = i;
         }
 
-        products.forEach(function (product, index) {
-            const row = document.createElement("div");
-            row.className = "product-row";
-
-            const info = document.createElement("div");
-            info.className = "product-info";
-
-            const name = document.createElement("strong");
-            name.textContent = product.name;
-
-            const details = document.createElement("span");
-            details.textContent =
-                "Price: ₹" + product.price +
-                " | Value: " + product.value;
-
-            info.appendChild(name);
-            info.appendChild(details);
-
-            const deleteButton = document.createElement("button");
-            deleteButton.className = "delete-btn";
-            deleteButton.textContent = "Delete";
-
-            deleteButton.addEventListener("click", function () {
-                products.splice(index, 1);
-                displayProducts();
-                clearResults();
-
-                showMessage(
-                    "Product deleted successfully.",
-                    "success-message"
-                );
-            });
-
-            row.appendChild(info);
-            row.appendChild(deleteButton);
-            productList.appendChild(row);
-        });
+        prefixBest[i] = bestIndex;
     }
 
-    // 6. ADD PRODUCT WITH VALIDATION
-    addButton.addEventListener("click", function () {
-        const name = nameInput.value.trim();
-        const price = Number(priceInput.value);
-        const value = Number(valueInput.value);
+    steps.push(step(
+        "Step 4: Build prefix-best values",
+        `<p>At each position, store the index of the highest-value subset seen so far.</p>
+         <p>This allows us to quickly select the best affordable Group B subset.</p>`
+    ));
 
-        if (name === "") {
-            showMessage("Please enter a product name.", "error-message");
-            nameInput.focus();
-            return;
-        }
+    // Step 5: Binary search
+    let bestValue = 0;
+    let bestLeft = null;
+    let bestRight = null;
+    let searchCalculations = [];
 
-        if (name.length > 40) {
-            showMessage(
-                "Product name must be 40 characters or less.",
-                "error-message"
+    for (const left of subsetsA) {
+        const remaining = currentBudget - left.cost;
+
+        if (remaining < 0) {
+            searchCalculations.push(
+                `${names(left.selected)}: ${money(left.cost)} exceeds the budget. Skipped.`
             );
-            nameInput.focus();
-            return;
+            continue;
         }
 
-        if (
-            priceInput.value.trim() === "" ||
-            !Number.isSafeInteger(price) ||
-            price <= 0
-        ) {
-            showMessage(
-                "Enter a valid positive whole-number price.",
-                "error-message"
-            );
-            priceInput.focus();
-            return;
-        }
+        let low = 0;
+        let high = subsetsB.length - 1;
+        let answer = -1;
 
-        if (
-            valueInput.value.trim() === "" ||
-            !Number.isSafeInteger(value) ||
-            value <= 0
-        ) {
-            showMessage(
-                "Enter a valid positive whole-number value score.",
-                "error-message"
-            );
-            valueInput.focus();
-            return;
-        }
+        while (low <= high) {
+            const mid = Math.floor((low + high) / 2);
 
-        if (products.length >= 20) {
-            showMessage(
-                "Maximum 20 products are allowed.",
-                "error-message"
-            );
-            return;
-        }
-
-        const duplicate = products.some(function (product) {
-            return product.name.toLowerCase() === name.toLowerCase();
-        });
-
-        if (duplicate) {
-            showMessage(
-                "A product with this name already exists.",
-                "error-message"
-            );
-            return;
-        }
-
-        products.push({
-            name: name,
-            price: price,
-            value: value
-        });
-
-        displayProducts();
-        clearResults();
-
-        showMessage("Product added successfully!", "success-message");
-
-        nameInput.value = "";
-        priceInput.value = "";
-        valueInput.value = "";
-    });
-
-    // 7. LOAD SAMPLE DATA
-    sampleButton.addEventListener("click", function () {
-        budgetInput.value = 5000;
-
-        products = [
-            { name: "Laptop Bag", price: 1500, value: 80 },
-            { name: "Headphones", price: 2000, value: 90 },
-            { name: "Shoes", price: 2500, value: 100 },
-            { name: "Watch", price: 1000, value: 50 },
-            { name: "Keyboard", price: 1200, value: 70 }
-        ];
-
-        displayProducts();
-        clearResults();
-
-        showMessage(
-            "Sample products loaded successfully!",
-            "success-message"
-        );
-    });
-
-    // 8. VALIDATE BUDGET AND PRODUCTS
-    function getInputData() {
-        const budget = Number(budgetInput.value);
-
-        if (
-            budgetInput.value.trim() === "" ||
-            !Number.isSafeInteger(budget) ||
-            budget <= 0 ||
-            budget > 100000
-        ) {
-            showMessage(
-                "Enter a whole-number budget between ₹1 and ₹100,000.",
-                "error-message"
-            );
-            budgetInput.focus();
-            return null;
-        }
-
-        if (products.length === 0) {
-            showMessage(
-                "Please add at least one product before running algorithms.",
-                "error-message"
-            );
-            return null;
-        }
-
-        return {
-            budget: budget,
-            products: products.map(function (product) {
-                return { ...product };
-            })
-        };
-    }
-
-    // 9. BRUTE FORCE ALGORITHM
-    function bruteForce(items, budget) {
-        let bestValue = 0;
-        let bestPrice = 0;
-        let bestItems = [];
-
-        function search(index, currentPrice, currentValue, selected) {
-            if (currentPrice > budget) {
-                return;
-            }
-
-            if (currentValue > bestValue) {
-                bestValue = currentValue;
-                bestPrice = currentPrice;
-                bestItems = selected.slice();
-            }
-
-            if (index === items.length) {
-                return;
-            }
-
-            // Include current product
-            selected.push(items[index]);
-
-            search(
-                index + 1,
-                currentPrice + items[index].price,
-                currentValue + items[index].value,
-                selected
-            );
-
-            selected.pop();
-
-            // Exclude current product
-            search(
-                index + 1,
-                currentPrice,
-                currentValue,
-                selected
-            );
-        }
-
-        search(0, 0, 0, []);
-
-        return {
-            value: bestValue,
-            price: bestPrice,
-            items: bestItems,
-            time: "O(n × 2ⁿ)",
-            space: "O(n)",
-            description:
-                "Brute Force checks every possible product combination and chooses the valid combination with the highest total value.",
-            steps: [
-                "Start with an empty shopping selection.",
-                "Consider the first product.",
-                "Explore two choices: include the product or exclude it.",
-                "Repeat these choices for every remaining product.",
-                "Reject combinations that exceed the shopping budget.",
-                "Compare valid combinations and keep the one with the highest value."
-            ]
-        };
-    }
-
-    // 10. DIVIDE AND CONQUER - MEET-IN-THE-MIDDLE
-    function divideAndConquer(items, budget) {
-        const middle = Math.floor(items.length / 2);
-        const left = items.slice(0, middle);
-        const right = items.slice(middle);
-
-        function generateSubsets(group) {
-            const subsets = [];
-
-            function generate(index, price, value, selected) {
-                if (price <= budget) {
-                    subsets.push({
-                        price: price,
-                        value: value,
-                        items: selected.slice()
-                    });
-                }
-
-                if (index === group.length) {
-                    return;
-                }
-
-                // Include product
-                selected.push(group[index]);
-
-                generate(
-                    index + 1,
-                    price + group[index].price,
-                    value + group[index].value,
-                    selected
-                );
-
-                selected.pop();
-
-                // Exclude product
-                generate(index + 1, price, value, selected);
-            }
-
-            generate(0, 0, 0, []);
-            return subsets;
-        }
-
-        const leftSubsets = generateSubsets(left);
-        const rightSubsets = generateSubsets(right);
-
-        rightSubsets.sort(function (a, b) {
-            return a.price - b.price;
-        });
-
-        const prefixBest = [];
-        let bestSoFar = null;
-
-        for (let i = 0; i < rightSubsets.length; i++) {
-            const current = rightSubsets[i];
-
-            if (
-                bestSoFar === null ||
-                current.value > bestSoFar.value
-            ) {
-                bestSoFar = current;
-            }
-
-            prefixBest.push(bestSoFar);
-        }
-
-        let bestValue = 0;
-        let bestPrice = 0;
-        let bestItems = [];
-
-        // Combine left and right subsets
-        for (const leftSet of leftSubsets) {
-            const remaining = budget - leftSet.price;
-
-            let low = 0;
-            let high = rightSubsets.length - 1;
-            let answer = -1;
-
-            // Binary search for the best affordable right subset
-            while (low <= high) {
-                const mid = Math.floor((low + high) / 2);
-
-                if (rightSubsets[mid].price <= remaining) {
-                    answer = mid;
-                    low = mid + 1;
-                } else {
-                    high = mid - 1;
-                }
-            }
-
-            if (answer !== -1) {
-                const rightSet = prefixBest[answer];
-
-                const totalValue =
-                    leftSet.value + rightSet.value;
-
-                const totalPrice =
-                    leftSet.price + rightSet.price;
-
-                if (totalValue > bestValue) {
-                    bestValue = totalValue;
-                    bestPrice = totalPrice;
-                    bestItems = leftSet.items.concat(rightSet.items);
-                }
+            if (subsetsB[mid].cost <= remaining) {
+                answer = mid;
+                low = mid + 1;
+            } else {
+                high = mid - 1;
             }
         }
 
-        return {
-            value: bestValue,
-            price: bestPrice,
-            items: bestItems,
-            time: "O(n × 2⁽ⁿ/²⁾)",
-            space: "O(n × 2⁽ⁿ/²⁾)",
-            description:
-                "Meet-in-the-Middle divides products into two groups, generates their subsets separately and combines the best affordable combinations.",
-            steps: [
-                "Divide the product list into two halves.",
-                "Generate all possible subsets in the first half.",
-                "Generate all possible subsets in the second half.",
-                "Sort the second-half subsets by their total price.",
-                "Calculate the remaining budget for each first-half subset.",
-                "Use binary search to find the best affordable second-half subset.",
-                "Combine both halves and keep the combination with the highest total value."
-            ]
-        };
-    }
+        if (answer >= 0) {
+            const right = subsetsB[prefixBest[answer]];
+            const combinedValue = left.value + right.value;
+            const combinedCost = left.cost + right.cost;
 
-    // 11. DYNAMIC PROGRAMMING
-    function dynamicProgramming(items, budget) {
-        const n = items.length;
+            searchCalculations.push(`
+                <p><strong>${names(left.selected)}</strong></p>
+                Remaining = ${money(currentBudget)} - ${money(left.cost)}
+                = ${money(remaining)}<br>
+                Best matching Group B = ${names(right.selected)}<br>
+                Combined price = ${money(combinedCost)}<br>
+                Combined value = ${left.value} + ${right.value}
+                = ${combinedValue}
+            `);
 
-        // Create DP table
-        const dp = Array.from(
-            { length: n + 1 },
-            function () {
-                return new Array(budget + 1).fill(0);
+            if (combinedCost <= currentBudget && combinedValue > bestValue) {
+                bestValue = combinedValue;
+                bestLeft = left;
+                bestRight = right;
             }
-        );
-
-        // Fill DP table
-        for (let i = 1; i <= n; i++) {
-            const price = items[i - 1].price;
-            const value = items[i - 1].value;
-
-            for (let w = 0; w <= budget; w++) {
-                // Exclude current product
-                dp[i][w] = dp[i - 1][w];
-
-                // Include current product if it fits
-                if (price <= w) {
-                    dp[i][w] = Math.max(
-                        dp[i][w],
-                        value + dp[i - 1][w - price]
-                    );
-                }
-            }
-        }
-
-        // Find selected products
-        let remainingBudget = budget;
-        const selectedItems = [];
-
-        for (let i = n; i > 0; i--) {
-            if (
-                dp[i][remainingBudget] !==
-                dp[i - 1][remainingBudget]
-            ) {
-                selectedItems.push(items[i - 1]);
-                remainingBudget -= items[i - 1].price;
-            }
-        }
-
-        selectedItems.reverse();
-
-        const totalPrice = selectedItems.reduce(
-            function (sum, item) {
-                return sum + item.price;
-            },
-            0
-        );
-
-        return {
-            value: dp[n][budget],
-            price: totalPrice,
-            items: selectedItems,
-            time: "O(nB)",
-            space: "O(nB)",
-            description:
-                "Dynamic Programming stores results of smaller subproblems in a table to calculate the optimal shopping combination.",
-            steps: [
-                "Create a DP table with products as rows and budget amounts as columns.",
-                "Initialize the table with zero values.",
-                "Consider each product one by one.",
-                "For each budget, compare excluding the product with including it.",
-                "Store the maximum value in the table.",
-                "Trace backwards through the table to identify selected products.",
-                "Return the combination with the maximum total value."
-            ]
-        };
-    }
-
-    // 12. GREEDY ALGORITHM
-    function greedyAlgorithm(items, budget) {
-        const sortedItems = items.slice().sort(function (a, b) {
-            const ratioA = a.value / a.price;
-            const ratioB = b.value / b.price;
-            return ratioB - ratioA;
-        });
-
-        let remaining = budget;
-        let totalValue = 0;
-        let totalPrice = 0;
-        const selectedItems = [];
-
-        for (const item of sortedItems) {
-            if (item.price <= remaining) {
-                selectedItems.push(item);
-                remaining -= item.price;
-                totalPrice += item.price;
-                totalValue += item.value;
-            }
-        }
-
-        return {
-            value: totalValue,
-            price: totalPrice,
-            items: selectedItems,
-            time: "O(n log n)",
-            space: "O(n)",
-            description:
-                "Greedy selects products with the highest value-to-price ratio first. It makes locally best choices but is not guaranteed to find the globally optimal solution.",
-            steps: [
-                "Calculate the value-to-price ratio for every product.",
-                "Sort products in descending order of this ratio.",
-                "Start with the full shopping budget.",
-                "Select the next product if it fits the remaining budget.",
-                "Skip products that do not fit.",
-                "Continue until all products have been considered.",
-                "Display the selected products and total value."
-            ]
-        };
-    }
-
-    // 13. FOUR-ALGORITHM COMPARISON DASHBOARD
-    function renderComparisonDashboard() {
-        const dashboard =
-            document.getElementById("comparisonDashboard");
-
-        const tableBody =
-            document.getElementById("comparisonTableBody");
-
-        if (
-            !dashboard ||
-            !tableBody ||
-            Object.keys(results).length !== 4
-        ) {
-            if (dashboard) dashboard.hidden = true;
-            return;
-        }
-
-        tableBody.innerHTML = "";
-
-        const algorithmInfo = [
-            { key: "brute", name: "Brute Force" },
-            { key: "divide", name: "Meet-in-the-Middle" },
-            { key: "dp", name: "Dynamic Programming" },
-            { key: "greedy", name: "Greedy" }
-        ];
-
-        const optimalValue = results.dp.value;
-
-        algorithmInfo.forEach(function (algorithm) {
-            const result = results[algorithm.key];
-            const row = document.createElement("tr");
-
-            const status =
-                result.value === optimalValue
-                    ? "Matches optimal value"
-                    : "Below optimal value";
-
-            const cells = [
-                algorithm.name,
-                "₹" + result.price.toLocaleString("en-IN"),
-                result.value.toLocaleString("en-IN"),
-                "₹" + (
-                    Number(budgetInput.value) - result.price
-                ).toLocaleString("en-IN"),
-                result.time,
-                result.space,
-                status
-            ];
-
-            cells.forEach(function (cellText) {
-                const cell = document.createElement("td");
-                cell.textContent = cellText;
-                row.appendChild(cell);
-            });
-
-            if (result.value === optimalValue) {
-                row.classList.add("optimal-row");
-            }
-
-            tableBody.appendChild(row);
-        });
-
-        dashboard.hidden = false;
-    }
-
-    // 14. DISPLAY ALGORITHM RESULTS
-    function displayResult(algorithm) {
-        const result = results[algorithm];
-
-        if (!result) {
-            return;
-        }
-
-        const names = {
-            brute: "Brute Force Algorithm",
-            divide: "Divide and Conquer – Meet-in-the-Middle",
-            dp: "Dynamic Programming Algorithm",
-            greedy: "Greedy Algorithm"
-        };
-
-        document.getElementById("resultTitle").textContent =
-            names[algorithm];
-
-        document.getElementById("resultDescription").textContent =
-            result.description;
-
-        document.getElementById("timeComplexity").textContent =
-            result.time;
-
-        document.getElementById("spaceComplexity").textContent =
-            result.space;
-
-        // Simple explanations of the complexity
-        const complexityDetails = {
-            brute: {
-                time: "Up to 2ⁿ subsets; copying a selected list can take up to n steps.",
-                space: "O(n) recursion depth and temporary/best selection lists."
-            },
-            divide: {
-                time: "Builds half-subsets, sorts one half and binary-searches matches.",
-                space: "Stores subset records and copied product lists for both halves."
-            },
-            dp: {
-                time: "Processes n products for each integer budget from 0 to B.",
-                space: "Stores an (n + 1) × (B + 1) dynamic-programming table."
-            },
-            greedy: {
-                time: "Sorts n products by value-to-price ratio, then scans them.",
-                space: "Stores a sorted copy and the selected-product list."
-            }
-        };
-
-        document.getElementById("timeExplanation").textContent =
-            complexityDetails[algorithm].time;
-
-        document.getElementById("spaceExplanation").textContent =
-            complexityDetails[algorithm].space;
-
-        // Display algorithm steps
-        const stepsList =
-            document.getElementById("algorithmSteps");
-
-        stepsList.innerHTML = "";
-
-        result.steps.forEach(function (step) {
-            const li = document.createElement("li");
-            li.textContent = step;
-            stepsList.appendChild(li);
-        });
-
-        // Display selected products
-        const selectedProducts =
-            document.getElementById("selectedProducts");
-
-        selectedProducts.innerHTML = "";
-
-        if (result.items.length === 0) {
-            selectedProducts.textContent =
-                "No products can be selected within this budget.";
-        } else {
-            result.items.forEach(function (item) {
-                const row = document.createElement("div");
-                row.className = "selected-product";
-
-                const name = document.createElement("span");
-                name.textContent = item.name;
-
-                const price = document.createElement("span");
-                price.textContent = "₹" + item.price;
-
-                row.appendChild(name);
-                row.appendChild(price);
-                selectedProducts.appendChild(row);
-            });
-        }
-
-        // Display summary
-        const budget = Number(budgetInput.value);
-
-        document.getElementById("totalPrice").textContent =
-            "₹" + result.price;
-
-        document.getElementById("totalValue").textContent =
-            result.value;
-
-        document.getElementById("remainingBudget").textContent =
-            "₹" + (budget - result.price);
-
-        const optimalValue = results.dp.value;
-
-        if (
-            algorithm === "greedy" &&
-            result.value < optimalValue
-        ) {
-            document.getElementById("resultMessage").textContent =
-                "Greedy found a valid solution, but it is not optimal for this input. Dynamic Programming found a higher value.";
-        } else {
-            document.getElementById("resultMessage").textContent =
-                "Total value: " + result.value +
-                ". All selected products are within your budget.";
         }
     }
 
-    // 15. RUN ALL FOUR ALGORITHMS
-    runButton.addEventListener("click", function () {
-        const data = getInputData();
+    steps.push(step(
+        "Step 5: Binary search and combine",
+        `<p>For every Group A subset, calculate the remaining budget and use binary search to find the most expensive affordable Group B subset. The prefix-best array identifies the highest-value option.</p>
+         ${searchCalculations.join("<hr style='border-color:#343b5d;margin:12px 0'>")}`
+    ));
 
-        if (data === null) {
-            return;
-        }
+    const selected = [
+        ...(bestLeft ? bestLeft.selected : []),
+        ...(bestRight ? bestRight.selected : [])
+    ];
 
-        const budget = data.budget;
-        const items = data.products;
+    steps.push(step(
+        "Step 6: Final result",
+        calculation(
+            "Combined products",
+            names(selected),
+            `Total Value = ${sumValue(selected)}`
+        ) +
+        calculation(
+            "Total price",
+            selected.map(p => p.price).join(" + "),
+            `${money(sumPrice(selected))} ≤ ${money(currentBudget)}`
+        )
+    ));
 
-        results.brute = bruteForce(items, budget);
-        results.divide = divideAndConquer(items, budget);
-        results.dp = dynamicProgramming(items, budget);
-        results.greedy = greedyAlgorithm(items, budget);
+    return makeResult("Meet-in-the-Middle", selected, steps);
+}
 
-        renderComparisonDashboard();
+// ================================================
+// 3. DYNAMIC PROGRAMMING
+// ================================================
 
-        showMessage(
-            "All four algorithms completed successfully!",
-            "success-message"
-        );
+function dynamicProgramming() {
+    const steps = [];
 
-        displayResult("brute");
+    const n = products.length;
+    const B = currentBudget;
 
-        document.getElementById("algorithms").scrollIntoView({
-            behavior: "smooth"
-        });
-    });
+    if (B > 100000) {
+        throw new Error("Please enter a budget up to ₹100,000.");
+    }
 
-    // 16. SWITCH BETWEEN ALGORITHM TABS
-    document.querySelectorAll(".algorithm-tab").forEach(
-        function (tab) {
-            tab.addEventListener("click", function () {
-                if (Object.keys(results).length === 0) {
-                    showMessage(
-                        "Please add products and click Run All Algorithms first.",
-                        "error-message"
-                    );
-                    return;
-                }
-
-                document.querySelectorAll(".algorithm-tab").forEach(
-                    function (button) {
-                        button.classList.remove("active");
-                    }
-                );
-
-                tab.classList.add("active");
-
-                const algorithm = tab.dataset.algorithm;
-                displayResult(algorithm);
-            });
-        }
+    // Create DP table
+    const dp = Array.from(
+        { length: n + 1 },
+        () => Array(B + 1).fill(0)
     );
 
-    // 17. RESET RESULTS WHEN INPUT CHANGES
-    budgetInput.addEventListener("input", function () {
-        clearResults();
-    });
+    steps.push(step(
+        "Step 1: Create the DP table",
+        calculation(
+            "Table dimensions",
+            "(n + 1) × (B + 1)",
+            `(${n} + 1) × (${B} + 1) = ${n + 1} × ${B + 1}`
+        ) +
+        "<p>Rows represent products. Columns represent budget values. Initially, all cells are zero.</p>"
+    ));
 
-    // 18. INITIALIZE WEBSITE
-    displayProducts();
-    clearResults();
+    // Fill table
+    for (let i = 1; i <= n; i++) {
+        const p = products[i - 1];
 
-    console.log("Algorithm Explorer is ready!");
-});
+        for (let b = 0; b <= B; b++) {
+            const exclude = dp[i - 1][b];
+
+            let include = -Infinity;
+
+            if (p.price <= b) {
+                include = p.value + dp[i - 1][b - p.price];
+            }
+
+            dp[i][b] = Math.max(exclude, include);
+        }
+    }
+
+    steps.push(step(
+        "Step 2: Apply the recurrence formula",
+        calculation(
+            "DP formula",
+            "DP[i][b] = max(Exclude, Include)",
+            "Exclude = DP[i-1][b]<br>Include = Value + DP[i-1][b-Price]"
+        ) +
+        "<p>If the product price is greater than the current budget, it cannot be included.</p>"
+    ));
+
+    // Show real calculations at full budget for each row
+    let calculations = "";
+
+    for (let i = 1; i <= n; i++) {
+        const p = products[i - 1];
+        const exclude = dp[i - 1][B];
+
+        if (p.price <= B) {
+            const include = p.value + dp[i - 1][B - p.price];
+
+            calculations += calculation(
+                `Product: ${p.name}`,
+                `Exclude = ${exclude}<br>
+                 Include = ${p.value} + DP[${i - 1}][${B - p.price}]<br>
+                 = ${p.value} + ${dp[i - 1][B - p.price]}<br>
+                 = ${include}`,
+                `DP[${i}][${B}] = max(${exclude}, ${include}) = ${dp[i][B]}`
+            );
+        } else {
+            calculations += calculation(
+                `Product: ${p.name}`,
+                `Price ${money(p.price)} > Budget ${money(B)}`,
+                `Cannot include this product at this budget.`
+            );
+        }
+    }
+
+    steps.push(step(
+        "Step 3: Calculate include and exclude choices",
+        `<p>Here are the actual include/exclude calculations at the entered budget:</p>
+         ${calculations}`
+    ));
+
+    // Select useful columns for a readable display.
+    // The algorithm still calculates every integer budget.
+    const columns = new Set([0, B]);
+
+    for (const p of products) {
+        if (p.price <= B) columns.add(p.price);
+    }
+
+    let cumulative = 0;
+    for (const p of products) {
+        cumulative += p.price;
+        if (cumulative <= B) columns.add(cumulative);
+    }
+
+    const displayColumns = [...columns].sort((a, b) => a - b);
+
+    const tableHTML = `
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Products</th>
+                        ${displayColumns.map(b => `<th>${b}</th>`).join("")}
+                    </tr>
+                </thead>
+                <tbody>
+                    ${Array.from({ length: n + 1 }, (_, i) => `
+                        <tr>
+                            <td>${i === 0 ? "None" : products[i - 1].name}</td>
+                            ${displayColumns.map(b => `<td>${dp[i][b]}</td>`).join("")}
+                        </tr>
+                    `).join("")}
+                </tbody>
+            </table>
+        </div>
+        <p style="margin-top:10px;color:#aaaec4">
+            Selected budget columns are shown for readability. The algorithm computes every integer budget from 0 to ${B}.
+        </p>
+    `;
+
+    steps.push(step(
+        "Step 4: DP table values",
+        `<p>Each cell stores the maximum value possible using the products considered and that budget.</p>
+         ${tableHTML}`
+    ));
+
+    // Backtracking
+    let selected = [];
+    let b = B;
+
+    for (let i = n; i > 0; i--) {
+        if (dp[i][b] !== dp[i - 1][b]) {
+            selected.push(products[i - 1]);
+            b -= products[i - 1].price;
+        }
+    }
+
+    selected.reverse();
+
+    steps.push(step(
+        "Step 5: Backtracking",
+        `<p>Start at DP[${n}][${B}] = ${dp[n][B]}.</p>
+         <p>Compare each row with the previous row. If the value changes, that product was included.</p>
+         <p>Selected products: ${names(selected)}</p>
+         <p>Final maximum value = ${dp[n][B]}</p>`
+    ));
+
+    steps.push(step(
+        "Step 6: Verify final answer",
+        calculation(
+            "Total price",
+            selected.map(p => p.price).join(" + "),
+            `${money(sumPrice(selected))} ≤ ${money(B)}`
+        ) +
+        calculation(
+            "Maximum value",
+            selected.map(p => p.value).join(" + "),
+            `= ${sumValue(selected)}`
+        )
+    ));
+
+    return makeResult("Dynamic Programming", selected, steps);
+}
+
+// ================================================
+// 4. GREEDY ALGORITHM
+// ================================================
+
+function greedyAlgorithm() {
+    const steps = [];
+
+    const sorted = products.map(p => ({
+        ...p,
+        ratio: p.value / p.price
+    }));
+
+    steps.push(step(
+        "Step 1: Calculate value-to-price ratio",
+        calculation(
+            "Formula",
+            "Ratio = Value ÷ Price",
+            "Calculate for every product."
+        ) +
+        `<div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Calculation</th>
+                        <th>Ratio</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${sorted.map(p => `
+                        <tr>
+                            <td>${p.name}</td>
+                            <td>${p.value} ÷ ${p.price}</td>
+                            <td>${p.ratio.toFixed(4)}</td>
+                        </tr>
+                    `).join("")}
+                </tbody>
+            </table>
+        </div>`
+    ));
+
+    // Sort in descending ratio order
+    sorted.sort((a, b) => b.ratio - a.ratio);
+
+    steps.push(step(
+        "Step 2: Sort in descending order",
+        `<p>Products with the highest value-to-price ratio are considered first.</p>
+         ${sorted.map((p, i) =>
+            `<p>${i + 1}. ${p.name} = ${p.ratio.toFixed(4)}</p>`
+         ).join("")}`
+    ));
+
+    // Select products
+    let selected = [];
+    let remaining = currentBudget;
+    let selectionCalculations = "";
+
+    for (const p of sorted) {
+        if (p.price <= remaining) {
+            selectionCalculations += calculation(
+                `Select ${p.name}`,
+                `${money(remaining)} - ${money(p.price)}`,
+                `Remaining budget = ${money(remaining - p.price)}`
+            );
+
+            selected.push(p);
+            remaining -= p.price;
+        } else {
+            selectionCalculations += calculation(
+                `Skip ${p.name}`,
+                `${money(p.price)} > ${money(remaining)}`,
+                "Product does not fit in the remaining budget."
+            );
+        }
+    }
+
+    steps.push(step(
+        "Step 3: Select products",
+        `<p>Check each product in ratio order. Select it only if its price fits within the remaining budget.</p>
+         ${selectionCalculations}`
+    ));
+
+    steps.push(step(
+        "Step 4: Calculate final result",
+        calculation(
+            "Selected products",
+            names(selected),
+            `Total value = ${sumValue(selected)}`
+        ) +
+        calculation(
+            "Total price",
+            selected.map(p => p.price).join(" + "),
+            `${money(sumPrice(selected))} ≤ ${money(currentBudget)}`
+        ) +
+        "<p>Greedy is fast, but it does not always guarantee the optimal solution for 0/1 Knapsack.</p>"
+    ));
+
+    return makeResult("Greedy", selected, steps);
+}
+
+// ================================================
+// DISPLAY RESULT CARDS
+// ================================================
+
+function displayResultCards() {
+    document.getElementById("results").classList.remove("hidden");
+
+    document.getElementById("resultCards").innerHTML =
+        Object.entries(algorithmResults).map(([key, r]) => `
+            <div class="result-card">
+                <h3>${r.algorithm}</h3>
+                <p><strong>Products:</strong> ${names(r.selected)}</p>
+                <p><strong>Total Cost:</strong> ${money(r.totalCost)}</p>
+                <p><strong>Total Value:</strong> ${r.totalValue}</p>
+                <p><strong>Remaining:</strong> ${money(r.remaining)}</p>
+                <button onclick="showAlgorithm('${key}')">
+                    View Mathematical Working
+                </button>
+            </div>
+        `).join("");
+}
+
+// ================================================
+// COMPARISON TABLE
+// ================================================
+
+function displayComparison() {
+    const info = [
+        ["Brute Force", "O(n × 2ⁿ)", "O(n)", "Yes", "brute"],
+        ["Meet-in-the-Middle", "O(n × 2ⁿ⁄²)", "O(2ⁿ⁄²)", "Yes", "divide"],
+        ["Dynamic Programming", "O(nB)", "O(nB)", "Yes", "dp"],
+        ["Greedy", "O(n log n)", "O(n)", "Not always", "greedy"]
+    ];
+
+    document.getElementById("comparisonBody").innerHTML =
+        info.map(row => `
+            <tr>
+                <td>${row[0]}</td>
+                <td>${row[1]}</td>
+                <td>${row[2]}</td>
+                <td>${row[3]}</td>
+                <td>${algorithmResults[row[4]].totalValue}</td>
+            </tr>
+        `).join("");
+}
+
+// ================================================
+// RUN ALL ALGORITHMS
+// ================================================
+
+function runAllAlgorithms() {
+    const input = document.getElementById("budget");
+    const budget = Number(input.value);
+
+    if (
+        input.value.trim() === "" ||
+        !Number.isSafeInteger(budget) ||
+        budget < 0 ||
+        budget > 100000
+    ) {
+        alert("Enter a whole-number budget between ₹0 and ₹100,000.");
+        return;
+    }
+
+    currentBudget = budget;
+
+    try {
+        algorithmResults = {
+            brute: bruteForce(),
+            divide: divideAndConquer(),
+            dp: dynamicProgramming(),
+            greedy: greedyAlgorithm()
+        };
+
+        displayResultCards();
+        displayComparison();
+        showAlgorithm("brute");
+
+        document.getElementById("results").scrollIntoView({
+            behavior: "smooth"
+        });
+
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
+// ================================================
+// SHOW SELECTED ALGORITHM WORKING
+// ================================================
+
+function showAlgorithm(type) {
+    const titles = {
+        brute: "Brute Force Algorithm",
+        divide: "Divide and Conquer – Meet-in-the-Middle",
+        dp: "Dynamic Programming",
+        greedy: "Greedy Algorithm"
+    };
+
+    const definitions = {
+        brute: "Checks every possible combination and selects the feasible combination with maximum value.",
+        divide: "Divides products into two groups, generates subsets, and uses sorting and binary search to combine suitable subsets.",
+        dp: "Stores maximum values in a table and compares including and excluding each product.",
+        greedy: "Selects products based on their value-to-price ratio, considering affordable products first."
+    };
+
+    const complexity = {
+        brute: ["O(n × 2ⁿ)", "O(n)", "Yes"],
+        divide: ["O(n × 2ⁿ⁄²)", "O(2ⁿ⁄²)", "Yes"],
+        dp: ["O(nB)", "O(nB)", "Yes"],
+        greedy: ["O(n log n)", "O(n)", "Not always"]
+    };
+
+    document.getElementById("algorithmTitle").textContent = titles[type];
+    document.getElementById("algorithmDefinition").textContent = definitions[type];
+
+    document.getElementById("timeComplexity").textContent = complexity[type][0];
+    document.getElementById("spaceComplexity").textContent = complexity[type][1];
+    document.getElementById("optimality").textContent = complexity[type][2];
+
+    document.querySelectorAll(".tab").forEach(b => b.classList.remove("active"));
+
+    const index = {
+        brute: 0,
+        divide: 1,
+        dp: 2,
+        greedy: 3
+    }[type];
+
+    document.querySelectorAll(".tab")[index].classList.add("active");
+
+    const working = document.getElementById("workingSteps");
+    const output = document.getElementById("algorithmOutput");
+
+    if (!algorithmResults[type]) {
+        working.innerHTML = step(
+            "Mathematical working",
+            "Enter a budget and click Run All Algorithms to see the calculations."
+        );
+
+        output.textContent = "No result yet.";
+        return;
+    }
+
+    const result = algorithmResults[type];
+
+    working.innerHTML = result.steps.join("");
+
+    output.innerHTML = `
+        <h3>Final Mathematical Answer</h3>
+        <p><strong>Algorithm:</strong> ${result.algorithm}</p>
+        <p><strong>Selected Products:</strong> ${names(result.selected)}</p>
+        <p><strong>Total Price:</strong> ${money(result.totalCost)}</p>
+        <p><strong>Budget:</strong> ${money(currentBudget)}</p>
+        <p><strong>Remaining Budget:</strong> ${money(result.remaining)}</p>
+        <p><strong>Total Value:</strong> ${result.totalValue}</p>
+        <p><strong>Budget Verification:</strong>
+        ${money(result.totalCost)} ≤ ${money(currentBudget)}</p>
+    `;
+}
+
+// ================================================
+// INITIAL LOAD
+// ================================================
+
+displayProducts();
+showAlgorithm("brute");
