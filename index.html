@@ -4,9 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Algorithm Explorer | Smart Shopping Optimizer</title>
-
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -14,7 +12,6 @@
 
     <!-- NAVIGATION -->
     <header class="navbar">
-
         <a href="#home" class="logo">
             Algo<span>Explorer.</span>
         </a>
@@ -29,18 +26,12 @@
                 ☀️ Light Mode
             </button>
         </nav>
-
     </header>
-
 
     <!-- HERO SECTION -->
     <section id="home" class="hero">
-
         <div class="hero-content">
-
-            <span class="tag">
-                DESIGN AND ANALYSIS OF ALGORITHMS
-            </span>
+            <span class="tag">DESIGN AND ANALYSIS OF ALGORITHMS</span>
 
             <h1>
                 Shop Smarter.<br>
@@ -56,14 +47,10 @@
             <a href="#optimizer" class="main-btn">
                 Explore Optimizer →
             </a>
-
         </div>
 
-
         <div class="hero-card">
-
             <span class="small-label">SMART SHOPPING SYSTEM</span>
-
             <div class="hero-icon">🛍️</div>
 
             <h2>Make Every Rupee Count</h2>
@@ -74,7 +61,6 @@
             </p>
 
             <div class="hero-stats">
-
                 <div>
                     <h3>04</h3>
                     <span>Algorithms</span>
@@ -89,19 +75,13 @@
                     <h3>20</h3>
                     <span>Products Max</span>
                 </div>
-
             </div>
-
         </div>
-
     </section>
-
 
     <!-- PROBLEM STATEMENT -->
     <section id="problem" class="section">
-
         <div class="section-heading">
-
             <span class="tag">ABOUT THE PROJECT</span>
 
             <h2>What Problem Are We Solving?</h2>
@@ -112,55 +92,41 @@
                 finds the combination of products that maximizes
                 total value without exceeding the budget.
             </p>
-
         </div>
 
-
         <div class="info-cards">
-
             <div class="info-card">
                 <div class="info-icon">🎯</div>
                 <span class="number">01</span>
-
                 <h3>Real-world Problem</h3>
-
                 <p>
                     Choosing useful products while staying
                     within a fixed shopping budget.
                 </p>
             </div>
 
-
             <div class="info-card">
                 <div class="info-icon">💡</div>
                 <span class="number">02</span>
-
                 <h3>Our Objective</h3>
-
                 <p>
                     Maximize the total value of selected
                     products without crossing the budget.
                 </p>
             </div>
 
-
             <div class="info-card">
                 <div class="info-icon">⚡</div>
                 <span class="number">03</span>
-
                 <h3>Our Solution</h3>
-
                 <p>
                     Solve the same problem using four
                     different algorithmic approaches.
                 </p>
             </div>
-
         </div>
 
-
         <div class="formula-card">
-
             <h3>Mathematical Formulation</h3>
 
             <p>
@@ -175,17 +141,12 @@
             <p class="formula-note">
                 Total Price ≤ Budget | Each product can be selected only once.
             </p>
-
         </div>
-
     </section>
-
 
     <!-- SHOPPING OPTIMIZER -->
     <section id="optimizer" class="section optimizer-section">
-
         <div class="section-heading">
-
             <span class="tag">TRY IT YOURSELF</span>
 
             <h2>Smart Shopping Optimizer</h2>
@@ -194,31 +155,20 @@
                 Enter your budget and products.
                 Our algorithms will calculate the best combination.
             </p>
-
         </div>
 
-
         <div class="input-card">
-
             <div class="card-heading">
-
                 <div>
                     <h3>Shopping Details</h3>
-
-                    <p>
-                        Enter your budget and add products below.
-                    </p>
+                    <p>Enter your budget and add products below.</p>
                 </div>
 
                 <span class="heading-icon">🛒</span>
-
             </div>
 
-
             <!-- BUDGET -->
-            <label for="budget">
-                Shopping Budget (₹)
-            </label>
+            <label for="budget">Shopping Budget (₹)</label>
 
             <input
                 type="number"
@@ -229,19 +179,12 @@
                 step="1"
             >
 
-
             <!-- PRODUCT INPUT -->
-            <h3 class="sub-heading">
-                Add Your Products
-            </h3>
-
+            <h3 class="sub-heading">Add Your Products</h3>
 
             <div class="form-grid">
-
                 <div>
-                    <label for="productName">
-                        Product Name
-                    </label>
+                    <label for="productName">Product Name</label>
 
                     <input
                         type="text"
@@ -251,11 +194,8 @@
                     >
                 </div>
 
-
                 <div>
-                    <label for="productPrice">
-                        Price (₹)
-                    </label>
+                    <label for="productPrice">Price (₹)</label>
 
                     <input
                         type="number"
@@ -266,11 +206,8 @@
                     >
                 </div>
 
-
                 <div>
-                    <label for="productValue">
-                        Value Score
-                    </label>
+                    <label for="productValue">Value Score</label>
 
                     <input
                         type="number"
@@ -280,33 +217,23 @@
                         step="1"
                     >
                 </div>
-
             </div>
-
 
             <button type="button" id="addProduct" class="main-btn">
                 + Add Product
             </button>
 
-
             <p id="message" role="status" aria-live="polite">
                 Add products to begin.
             </p>
 
-
             <!-- PRODUCT LIST -->
             <div id="productList" class="product-list">
-
-                <p class="empty-message">
-                    No products added yet.
-                </p>
-
+                <p class="empty-message">No products added yet.</p>
             </div>
-
 
             <!-- ACTION BUTTONS -->
             <div class="action-buttons">
-
                 <button type="button" id="loadSample" class="secondary-btn">
                     Load Sample Data
                 </button>
@@ -314,19 +241,13 @@
                 <button type="button" id="runAlgorithms" class="main-btn">
                     Run All Algorithms →
                 </button>
-
             </div>
-
         </div>
-
     </section>
-
 
     <!-- ALGORITHM RESULTS -->
     <section id="algorithms" class="section">
-
         <div class="section-heading">
-
             <span class="tag">ALGORITHM COMPARISON</span>
 
             <h2>Explore Four Approaches</h2>
@@ -335,148 +256,137 @@
                 Select an algorithm to understand its working,
                 complexities and result.
             </p>
-
         </div>
-
 
         <!-- ALGORITHM TABS -->
         <div class="algorithm-tabs">
-
-            <button class="algorithm-tab active"
-                    data-algorithm="brute">
+            <button class="algorithm-tab active" data-algorithm="brute">
                 Brute Force
             </button>
 
-            <button class="algorithm-tab"
-                    data-algorithm="divide">
+            <button class="algorithm-tab" data-algorithm="divide">
                 Divide and Conquer
             </button>
 
-            <button class="algorithm-tab"
-                    data-algorithm="dp">
+            <button class="algorithm-tab" data-algorithm="dp">
                 Dynamic Programming
             </button>
 
-            <button class="algorithm-tab"
-                    data-algorithm="greedy">
+            <button class="algorithm-tab" data-algorithm="greedy">
                 Greedy
             </button>
-
         </div>
 
+        <!-- FOUR-ALGORITHM COMPARISON DASHBOARD -->
+        <div id="comparisonDashboard" class="comparison-card" hidden>
+            <div class="comparison-heading">
+                <h3>Four-Algorithm Comparison</h3>
+                <p>
+                    Compare spending, total value, remaining budget and complexity.
+                </p>
+            </div>
+
+            <div class="comparison-table-wrap">
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Algorithm</th>
+                            <th>Spending</th>
+                            <th>Total Value</th>
+                            <th>Remaining</th>
+                            <th>Time</th>
+                            <th>Space</th>
+                            <th>Result</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="comparisonTableBody"></tbody>
+                </table>
+            </div>
+
+            <p class="comparison-note">
+                Dynamic Programming gives the optimal value for this 0/1 Knapsack problem.
+                Greedy is a heuristic and may produce a lower value.
+            </p>
+        </div>
 
         <!-- RESULT CARD -->
         <div class="result-card">
-
             <div class="result-heading">
-
                 <span class="tag">ALGORITHM DETAILS</span>
 
-                <h3 id="resultTitle">
-                    Brute Force Algorithm
-                </h3>
+                <h3 id="resultTitle">Brute Force Algorithm</h3>
 
                 <p id="resultDescription">
                     Run the algorithms to view their results.
                 </p>
-
             </div>
-
 
             <!-- COMPLEXITIES -->
             <div class="complexity-grid">
-
                 <div class="complexity-box">
-
                     <span>TIME COMPLEXITY</span>
-
-                    <h3 id="timeComplexity">O(2ⁿ)</h3>
-
+                    <h3 id="timeComplexity">O(n × 2ⁿ)</h3>
+                    <p id="timeExplanation">
+                        Run the algorithms to view the time analysis.
+                    </p>
                 </div>
-
 
                 <div class="complexity-box">
-
                     <span>SPACE COMPLEXITY</span>
-
                     <h3 id="spaceComplexity">O(n)</h3>
-
+                    <p id="spaceExplanation">
+                        Run the algorithms to view the space analysis.
+                    </p>
                 </div>
-
             </div>
-
 
             <!-- STEP BY STEP -->
             <div class="steps-section">
-
                 <h3>How It Works – Step by Step</h3>
 
                 <ol id="algorithmSteps">
-
-                    <li>
-                        Enter your budget and products.
-                    </li>
-
-                    <li>
-                        Click Run All Algorithms.
-                    </li>
-
-                    <li>
-                        Select an algorithm to view its explanation.
-                    </li>
-
+                    <li>Enter your budget and products.</li>
+                    <li>Click Run All Algorithms.</li>
+                    <li>Select an algorithm to view its explanation.</li>
                 </ol>
-
             </div>
-
 
             <!-- SELECTED PRODUCTS -->
             <div class="solution-section">
-
                 <h3>Selected Products</h3>
 
                 <div id="selectedProducts">
                     <p>Results will appear here.</p>
                 </div>
-
             </div>
-
 
             <!-- SUMMARY -->
             <div class="result-summary">
-
                 <div>
                     <span>Total Spending</span>
                     <h3 id="totalPrice">₹0</h3>
                 </div>
-
 
                 <div>
                     <span>Total Value</span>
                     <h3 id="totalValue">0</h3>
                 </div>
 
-
                 <div>
                     <span>Remaining Budget</span>
                     <h3 id="remainingBudget">₹0</h3>
                 </div>
-
             </div>
-
 
             <p id="resultMessage" class="result-message">
                 Add products and run the algorithms to compare results.
             </p>
-
         </div>
-
     </section>
-
 
     <!-- FOOTER -->
     <footer>
-
         <div class="footer-logo">
             Algo<span>Explorer.</span>
         </div>
@@ -488,11 +398,8 @@
         <p class="footer-small">
             Built using HTML, CSS and JavaScript
         </p>
-
     </footer>
 
-
     <script src="script.js"></script>
-
 </body>
 </html>
